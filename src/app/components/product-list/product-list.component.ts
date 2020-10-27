@@ -13,10 +13,18 @@ import { ProductService } from 'src/app/services/product.service';
 export class ProductListComponent implements OnInit {
 
   //Setup a property, an array of product
-  products: Product[];
-  currentCategoryId: number;
+  products: Product[] = [];
+  currentCategoryId: number = 1;
   currentCategoryName: string;
-  searchMode: boolean;
+  previousCategoryId: number = 1;
+  searchMode: boolean = false;
+
+  // new properties for pagination
+  thePageNumber: number = 1;
+  thePageSize: number = 10;
+  theTotalElements: number = 0;
+
+
   //Inject our ProductService dependency here in product-list component
   constructor(private productService: ProductService,
               private route:ActivatedRoute) { }
@@ -76,21 +84,43 @@ export class ProductListComponent implements OnInit {
       this.currentCategoryName = 'Books';
     }
 
+
+    //
+    // Check if we have a different category than previous
+    // Note: Angular will reuse a component if it is currently being viewed
+    //
+
+    // if we have a different category id than previous
+    // then set the pageNumber back to 1
+    if(this.previousCategoryId != this.currentCategoryId) {
+      this.thePageNumber = 1;
+    }
+
+    this.previousCategoryId = this.currentCategoryId;
+
+    console.log(`currentCategoryId=${this.currentCategoryId}, thePageNumber=${this.thePageNumber}`);
+
     /*
     inside use productService and call productList and subscribe to that data
     and then the method is actually invoked once subscribe
     */
 
     //now get the products for the given category id
-    this.productService.getProductList(this.currentCategoryId).subscribe(
-      //so this method will execute in an asynchronous fashion
-      data => {
-        //when the data is return we can assign it to our own property.
-        //So in heresimply assign the result to our product Array.
-        this.products = data;
-      }
-    )
+    this.productService.getProductListPaginate(this.thePageNumber - 1,
+                                              this.thePageSize,
+                                              this.currentCategoryId)
+                                              .subscribe(this.processResult());
 
+
+  }
+
+  processResult() {
+    return data => {
+      this.products = data._embedded.products;
+      this.thePageNumber = data.page.number + 1;
+      this.thePageSize = data.page.size;
+      this.theTotalElements = data.page.totalElements;
+    };
   }
 
 }
