@@ -23,6 +23,18 @@ export class ProductService {
     return this.httpClient.get<Product>(productUrl);
   }
 
+   //write new method - returns an observable of product array - This method will map the json data from the Spring REST service to a product array
+   getProductListPaginate(thePage: number,
+                          thePageSize: number,
+                          theCategoryId: number): Observable<GetResponseProducts> {
+
+    // need to build URL based on category id, page and size ... we're doing it now!
+    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${theCategoryId}`
+                      + `&page=${thePage}&size=${thePageSize}`;
+
+    return this.httpClient.get<GetResponseProducts>(searchUrl);
+  }
+
   //write new method - returns an observable of product array - This method will map the json data from the Spring REST service to a product array
   getProductList(theCategoryId: number): Observable<Product[]> {
 
@@ -59,6 +71,12 @@ interface GetResponseProducts {
   _embedded: {
     //this will access some array of products
     products: Product[];
+  },
+  page: {
+    size: number,
+    totalElements: number,
+    totalPages: number,
+    number: number
   }
 }
 
