@@ -1,21 +1,22 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
 import { CartItem } from '../common/cart-item';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
 
-
   cartItems: CartItem[] = [];
 
   totalPrice: Subject<number> = new Subject<number>();
   totalQuantity: Subject<number> = new Subject<number>();
 
-  constructor(theCartItem: CartItem) {
+  constructor() { }
 
-    // check if we already have teh item in our cart
+  addToCart(theCartItem: CartItem) {
+
+    // check if we already have the item in our cart
     let alreadyExistsInCart: boolean = false;
     let existingCartItem: CartItem = undefined;
 
@@ -28,22 +29,24 @@ export class CartService {
           break;
         }
       }
+
       // check if we found it
       alreadyExistsInCart = (existingCartItem != undefined);
     }
 
     if (alreadyExistsInCart) {
-      // increment quantity
-      existingCartItem.quantity++
+      // increment the quantity
+      existingCartItem.quantity++;
     }
     else {
       // just add the item to the array
       this.cartItems.push(theCartItem);
     }
 
-    // compute the cart totalPrice & totalQuantity
+    // compute cart total price and total quantity
     this.computeCartTotals();
   }
+
   computeCartTotals() {
 
     let totalPriceValue: number = 0;
@@ -54,23 +57,23 @@ export class CartService {
       totalQuantityValue += currentCartItem.quantity;
     }
 
-    // publish the new values ... all subscriber will received the new data
+    // publish the new values ... all subscribers will receive the new data
     this.totalPrice.next(totalPriceValue);
     this.totalQuantity.next(totalQuantityValue);
 
     // log cart data just for debugging purposes
     this.logCartData(totalPriceValue, totalQuantityValue);
   }
+
   logCartData(totalPriceValue: number, totalQuantityValue: number) {
 
-    console.log(`Content of the cart`);
+    console.log('Contents of the cart');
     for (let tempCartItem of this.cartItems) {
       const subTotalPrice = tempCartItem.quantity * tempCartItem.unitPrice;
       console.log(`name: ${tempCartItem.name}, quantity=${tempCartItem.quantity}, unitPrice=${tempCartItem.unitPrice}, subTotalPrice=${subTotalPrice}`);
     }
 
     console.log(`totalPrice: ${totalPriceValue.toFixed(2)}, totalQuantity: ${totalQuantityValue}`);
-    console.log('-----');
-
+    console.log('----');
   }
 }
