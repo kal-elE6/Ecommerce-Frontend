@@ -1,9 +1,11 @@
+import { Product } from './product';
+
 export class CartItem {
 
   id: string;
   name: string;
   imageUrl: string;
-  unitPrice: string;
+  unitPrice: number;
 
   quantity: number;
 
